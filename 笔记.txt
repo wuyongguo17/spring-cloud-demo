@@ -1,0 +1,190 @@
+1，Hystrix-Moniter：
+    浏览器访问地址：http://localhost:8762/hystrix
+    访问后第一个空格填写：http://localhost:8762/hystrix.stream    //hystrix.stream是registrationBean.addUrlMappings("/hystrix.stream")中的地址。
+
+2，Zuul：
+    启动类添加@EnableZuulProxy注解。配置文件如下：
+    server:
+      port: 8766
+    spring:
+      application:
+        name: spring-cloud-zuul
+
+    eureka:
+      instance:
+        hostname: localhost
+        port: 8761
+
+      client:
+        service-url:
+          defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+
+    zuul:
+      routes:
+        api-a:
+          path: /api/a/**
+          serviceId: eureka-client-one     //spring.application.name的值
+        api-b:
+          path: /api/b/**
+          servceId: eureka-client-two
+
+    这样设置后，我们统一从zull访问，由他寻找到服务，例如：http://localhost:8766/api/a/hi?message=client-one  就能找到之前这样的访问：http://localhost:8762/hi?message=client-one
+
+3，Spring-cloud-config：
+    启动类添加@EnableConfigServer注解。
+    服务端application.yml文件配置如下：
+        server:
+          port: 8888     //注意这里，8888为默认端口，如果要修改端口，要在bootstrap.yml文件中修改。bootstrap.yml优先于application.yml和application.properties文件加载。
+
+        spring:
+          application:
+            name: spring-config
+          profiles:
+            active: native
+          # 配置中心
+          cloud:
+            config:
+              server:
+                native:
+                  search-locations: classpath:/config/
+
+        # 注册中心配置
+        eureka:
+          instance:
+            hostname: localhost
+            port: 8761
+
+          client:
+            service-url:
+              defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+
+        注意要引入：  <dependency>
+                          <groupId>org.springframework.cloud</groupId>
+                          <artifactId>spring-cloud-config-server</artifactId>
+                      </dependency>
+
+
+    客户端配置如下：
+        server:
+          port: 8764
+        spring:
+          application:
+            name: read-business
+          cloud:
+            config:
+              fail-fast: true
+              name: ${spring.application.name}
+              profile: ${spring.profiles.active}
+              discovery:
+                enabled: true
+                service-id: spring-config   //spring.application.name的值
+          profiles:
+            active: dev
+          main:
+            allow-bean-definition-overriding: true
+
+        eureka:
+          instance:
+            hostname: localhost
+            port: 8761
+
+          client:
+            service-url:
+              defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+
+        注意要引入：  <dependency>
+              			<groupId>org.springframework.cloud</groupId>
+              			<artifactId>spring-cloud-starter-config</artifactId>
+              		</dependency>
+
+
+4，链路追踪：
+    添加依赖：
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-server</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-autoconfigure-ui</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+    启动类新增@EnableZipkinServer注解，配置如下
+    server:
+      port: 9411   //zipkin的默认端口
+
+    spring:
+      application:
+        name: spring-cloud-zipkin
+      cloud:
+        config:
+          fail-fast: true
+          name: ${spring.application.name}
+          profile: ${spring.profiles.active}
+          discovery:
+            enabled: true
+            service-id: spring-config
+      profiles:
+        active: dev
+      main:
+        allow-bean-definition-overriding: true
+
+    eureka:
+      instance:
+        hostname: localhost
+        port: 8761
+      client:
+        service-url:
+          defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+
+    //2.8版本以后要添加下面的配置
+    managment:
+      metrics:
+        web:
+          server:
+            auto-time-requests: false
+
+
+    注意：所有被追踪的服务要在其yml文件中添加如下配置及依赖：
+        spring:
+            zipkin:
+                base-url: http://localhost:9411   //自己本身不需要
+
+    访问地址：http://localhost:9411/zipkin/
+
+
+5，spring-boot-admin：
+    增加依赖：
+    <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>de.codecentric</groupId>
+        <artifactId>spring-boot-admin-starter-server</artifactId>
+        <version>2.1.0</version>  //2.1.0版本能够兼容spring-boot 2.1.7
+    </dependency>
+
+    服务端：@EnableAdminServer
+    客户端增加依赖：
+             <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-starter-client</artifactId>
+                <version>2.1.0</version>
+            </dependency>
+
+    并且yml文件添加如下配置（所有要被监控的服务都要添加）：
+    spring:
+      boot:
+         admin:
+            client:
+               url: http://localhost:8084
+
+    访问地址：http://localhost:8084
+

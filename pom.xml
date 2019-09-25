@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<!--管理jar包的版本-->
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.wyg</groupId>
+	<artifactId>spring-parent</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>spring-parent</name>
+	<description>Demo project for Spring Boot</description>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>common-library</module>
+		<module>eureka-server</module>
+		<module>eureka-client-one</module>
+		<module>eureka-client-two</module>
+        <module>read-business</module>
+		<module>spring-cloud-zuul</module>
+		<module>spring-cloud-config</module>
+		<module>spring-cloud-zipkin</module>
+        <module>spring-cloud-admin</module>
+    </modules>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<project.encoding>UTF8</project.encoding>
+		<spring-cloud.version>Greenwich.SR2</spring-cloud.version>
+		<spring-boot.version>2.1.7.RELEASE</spring-boot.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.encoding}</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

@@ -1,0 +1,35 @@
+server:
+  port: 9411
+
+spring:
+  application:
+    name: spring-cloud-zipkin
+  cloud:
+    config:
+      fail-fast: true
+      name: ${spring.application.name}
+      profile: ${spring.profiles.active}
+      discovery:
+        enabled: true
+        service-id: spring-config
+  profiles:
+    active: dev
+  main:
+    allow-bean-definition-overriding: true
+
+eureka:
+  instance:
+    hostname: localhost
+    port: 8761
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${eureka.instance.port}/eureka/
+
+management:
+  metrics:
+    web:
+      server:
+        auto-time-requests: false
+
+
+
