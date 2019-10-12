@@ -20,6 +20,7 @@
 		<module>spring-cloud-config</module>
 		<module>spring-cloud-zipkin</module>
         <module>spring-cloud-admin</module>
+		<module>spring-cloud-gateway</module>
     </modules>
 
 	<properties>

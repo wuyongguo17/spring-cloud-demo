@@ -24,6 +24,7 @@ eureka:
   instance:
     hostname: localhost
     port: 8761
+    prefer-ip-address: true
 
   client:
     service-url:
